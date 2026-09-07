@@ -2,6 +2,8 @@
 
 Interactive landing page for the fictional **Fizzi** soda brand. Floating 3D cans (React Three Fiber), scroll-driven GSAP animation, and all copy managed in Prismic slices.
 
+![FizziFresh landing page](./public/readme.png)
+
 ## Stack
 
 | Tech | Version |

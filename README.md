@@ -1,70 +1,80 @@
-# Fizzi 3D Website Product - Landing Page with Next.js, Prismic, Three.js, Tailwind, and GSAP
+# FizziFresh — 3D Soda Landing Page
 
-This repository contains the source code for building a creative personal portfolio. It showcases how to integrate modern web development technologies like **Next.js**, **Prismic**, **Three.js**, **Tailwind CSS**, and **GSAP** to create a visually dynamic and interactive personal website.
+Interactive landing page for the fictional **Fizzi** soda brand. Floating 3D cans (React Three Fiber), scroll-driven GSAP animation, and all copy managed in Prismic slices.
 
-## Overview
+## Stack
 
-In this project, we aim to build a sleek and modern personal portfolio for showcasing work, skills, and projects. This includes:
-- **Next.js** for server-side rendering and routing.
-- **Prismic** for content management, allowing easy updating of portfolio content.
-- **Three.js** to bring 3D elements to the website, making it visually engaging.
-- **Tailwind CSS** for easy styling and rapid UI development.
-- **GSAP (GreenSock Animation Platform)** for advanced animations and transitions that bring life to the portfolio.
+| Tech | Version |
+| --- | --- |
+| Next.js (Turbopack) | 16.x |
+| React | 19.x |
+| Tailwind CSS | 3.4.x |
+| Three.js / React Three Fiber / drei | 0.185 / 9.x / 10.x |
+| GSAP | 3.15.x |
+| Prismic (`@prismicio/*`) | client 7.x |
 
 ## Features
 
-- Dynamic content management via **Prismic**.
-- 3D models and scenes created with **Three.js**.
-- Fluid and interactive UI using **Tailwind CSS**.
-- Smooth animations and transitions with **GSAP**.
-- Server-side rendering and performance optimization using **Next.js**.
+- **3D hero cans** — `ViewCanvas` + `FloatingCan` / `SodaCan`, with graceful fallback to a static page when WebGL is unavailable (headless browsers, GPU-less VMs).
+- **Prismic slices** — `Hero`, `SkyDive`, `Carousel`, `BigText`, `AlternatingText` (`src/slices`).
+- **Live previews & webhooks** — `/api/preview`, `/api/exit-preview`, and tag-based revalidation via `POST /api/revalidate`.
+- **Slice Simulator** at `/slice-simulator` for local slice development.
 
-## Installation
+## Getting started
 
-To get started, clone this repository to your local machine:
+Prerequisites: **Node.js 20 LTS+**.
 
 ```bash
 git clone https://github.com/TheNeovimmer/fizzifresh.git
+cd fizzifresh
+npm install --legacy-peer-deps   # required: @react-three/drei peer range conflicts otherwise
+npm run next:dev                  # http://localhost:3000
 ```
-Install dependencies:
 
-```bash 
-npm install
+`npm run dev` additionally starts Slice Machine alongside Next.js.
+
+## Environment variables
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_PRISMIC_ENVIRONMENT` | No | Overrides the Prismic repo name (default: `fizzi` from `slicemachine.config.json`). |
+| `REVALIDATE_SECRET` | No | Shared secret for `POST /api/revalidate?secret=…`. Set it and point the Prismic webhook there; when unset the endpoint keeps legacy open behavior. |
+| `SLICE_SIMULATOR_SECRET` | No | Optional secret gate for `/slice-simulator`. |
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run next:dev` | Next.js dev server (Turbopack). |
+| `npm run dev` | Dev server + Slice Machine concurrently. |
+| `npm run build` / `npm start` | Production build / serve. |
+| `npm run slicemachine` | Slice Machine UI only. |
+| `npm run lint` / `npm run format` | ESLint / Prettier. |
+
+## Project structure
+
 ```
-Running the Project
-
-```bash 
-npm run dev
+src/
+  app/            # routes: page, [uid], api/{preview,revalidate,exit-preview}, slice-simulator
+  components/     # ViewCanvas, FloatingCan, SodaCan, Header, Footer, …
+  slices/         # Prismic slice components
+  prismicio.ts    # Prismic client (routes + fetch caching)
+public/fonts/     # Alpino variable font (next/font/local)
 ```
-Open http://localhost:3000 in your browser to see the project.
 
-## Prismic Setup
-To manage content with Prismic, follow these steps:
+## Security notes
 
-- **Create a Prismic account at Prismic.io.**
-- **Set up a new repository for your portfolio.**
-- **Define the content models (e.g., projects, about section) in the Prismic dashboard.**
-- **Update the API endpoint in the project’s prismic-config.js with your Prismic repository’s URL.**
-- **Customization**
-- **Feel free to customize the design and functionality to match your style and preferences. You can easily adjust the styling by editing the Tailwind configuration file, or update content through Prismic.**
+- **CVE-2025-29927** (Next.js middleware auth bypass) remediated by running Next 16; the repo ships no middleware, as defense in depth.
+- Remaining `npm audit` findings are dev-only (Slice Machine's express chain, Tailwind's build-time YAML) with no production runtime exposure.
 
-## Image Assets
-Image assets for the portfolio (such as project screenshots, background images, etc.) can be found in the assets/ folder. Replace these with your own images to personalize the portfolio.
+## Deploy
 
-## Components
-The repository includes reusable React components such as:
+Works on any Next.js host (Vercel recommended). Set the env vars above, configure the Prismic webhook to `https://<domain>/api/revalidate?secret=<REVALIDATE_SECRET>`, and deploy.
 
-- **Navbar**
-- **Project Cards**
-- **Hero Section**
-- **Footer**
-These components are modular and can be easily adapted or expanded based on your specific needs.
-
-## Technologies Used
-- **Next**.js: A React framework for server-side rendering and static site generation.
-- **Prismic**: A headless CMS for managing content.
-- **Three.js**: A 3D JavaScript library for creating interactive 3D graphics.
-- **Tailwind CSS**: A utility-first CSS framework for styling.
-- **GSAP**: A JavaScript library for high-performance animations.
 ## Contributing
-If you'd like to contribute to the project, feel free to open a pull request or raise an issue on GitHub.
+
+PRs and issues welcome — see [open issues](https://github.com/TheNeovimmer/fizzifresh/issues).
+
+## License
+
+Apache-2.0 — see [LICENSE](./LICENSE).

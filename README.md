@@ -1,82 +1,101 @@
-# FizziFresh — 3D Soda Landing Page
+# FizziFresh
 
-Interactive landing page for the fictional **Fizzi** soda brand. Floating 3D cans (React Three Fiber), scroll-driven GSAP animation, and all copy managed in Prismic slices.
+Hi, thanks for stopping by.
+
+I built FizziFresh because I wanted a soda site that actually feels like soda — loud, fizzy, a little over the top. It's a landing page for a fictional brand called Fizzi, with two 3D cans floating over a bright yellow page that says LIVE GUTSY.
 
 ![FizziFresh landing page](./public/readme.png)
 
-## Stack
+The short version: it's Next.js + Three.js + GSAP + Prismic. The long version is below.
 
-| Tech | Version |
-| --- | --- |
-| Next.js (Turbopack) | 16.x |
-| React | 19.x |
-| Tailwind CSS | 3.4.x |
-| Three.js / React Three Fiber / drei | 0.185 / 9.x / 10.x |
-| GSAP | 3.15.x |
-| Prismic (`@prismicio/*`) | client 7.x |
+### What it is
 
-## Features
+Fizzi is a prebiotic soda — 3 to 5g sugar, 9g fiber, 5 flavors, no artificial stuff. The site is the pitch for it. Big type, floating Black Cherry and Lemon Lime cans, scroll animations that carry you from hero to flavor picker to manifesto.
 
-- **3D hero cans** — `ViewCanvas` + `FloatingCan` / `SodaCan`, with graceful fallback to a static page when WebGL is unavailable (headless browsers, GPU-less VMs).
-- **Prismic slices** — `Hero`, `SkyDive`, `Carousel`, `BigText`, `AlternatingText` (`src/slices`).
-- **Live previews & webhooks** — `/api/preview`, `/api/exit-preview`, and tag-based revalidation via `POST /api/revalidate`.
-- **Slice Simulator** at `/slice-simulator` for local slice development.
+I wanted it to feel like a real product launch, not a demo. So everything you read on the page comes from Prismic, the 3D is real geometry you can orbit around, and if your device can't do WebGL it just quietly shows you the static page instead of breaking.
 
-## Getting started
+### What I made
 
-Prerequisites: **Node.js 20 LTS+**.
+The hero with the two floating cans. I modeled the flow around a single fixed Canvas in the layout, then each section portals its own 3D scene into it. Scrolling drives GSAP timelines — background color shifts, text staggers in, cans drift.
+
+The flavor carousel was the fun part. Pick a flavor, the can spins, the background color melts into the new flavor color, the copy swaps. State lives in zustand so it stays snappy.
+
+The slices, for reference:
+
+- Hero — the LIVE GUTSY intro, sticky 3D scene, little bubble particles
+- SkyDive — full screen falling can moment
+- Carousel — the 5 flavor picker
+- AlternatingText — sticky visual with alternating story blocks
+- BigText — the giant SODA THAT MAKES YOU SMILE wall
+
+### How it's built
+
+Next.js 16 with the App Router and Turbopack, React 19, Tailwind 3.4 for styling. Three.js via react-three-fiber 9 and drei 10 for the 3D, GSAP 3.15 with ScrollTrigger for motion, Prismic for content, zustand for tiny bits of client state. Type is Alpino Variable, loaded locally with next/font. TypeScript throughout.
+
+Prismic handles routes too — home at `/`, everything else at `/:uid` — with tag-based caching and on-demand revalidation when you publish.
+
+### Run it yourself
+
+You'll need Node 24 or newer.
 
 ```bash
 git clone https://github.com/TheNeovimmer/fizzifresh.git
 cd fizzifresh
-npm install --legacy-peer-deps   # required: @react-three/drei peer range conflicts otherwise
-npm run next:dev                  # http://localhost:3000
+
+# legacy-peer-deps is needed, drei still wants React 18 peers
+npm install --legacy-peer-deps
+
+npm run next:dev
+# open http://localhost:3000
 ```
 
-`npm run dev` additionally starts Slice Machine alongside Next.js.
+A few commands I use a lot:
 
-## Environment variables
+- `npm run next:dev` — just Next
+- `npm run dev` — Next + Slice Machine together
+- `npm run build` / `npm start` — production build and serve
+- `npm run slicemachine` — slice editor on its own
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_PRISMIC_ENVIRONMENT` | No | Overrides the Prismic repo name (default: `fizzi` from `slicemachine.config.json`). |
-| `REVALIDATE_SECRET` | No | Shared secret for `POST /api/revalidate?secret=…`. Set it and point the Prismic webhook there; when unset the endpoint keeps legacy open behavior. |
-| `SLICE_SIMULATOR_SECRET` | No | Optional secret gate for `/slice-simulator`. |
+### Config
 
-## Scripts
+You don't need env vars to run it locally, but for a real deploy you'll want these:
 
-| Command | What it does |
-| --- | --- |
-| `npm run next:dev` | Next.js dev server (Turbopack). |
-| `npm run dev` | Dev server + Slice Machine concurrently. |
-| `npm run build` / `npm start` | Production build / serve. |
-| `npm run slicemachine` | Slice Machine UI only. |
-| `npm run lint` / `npm run format` | ESLint / Prettier. |
+- `NEXT_PUBLIC_PRISMIC_ENVIRONMENT` — override the Prismic repo name, defaults to `fizzi`
+- `REVALIDATE_SECRET` — shared secret for `POST /api/revalidate?secret=...`, point your Prismic webhook at it
+- `SLICE_SIMULATOR_SECRET` — optional gate for `/slice-simulator`
 
-## Project structure
+Webhook shape:
+
+```
+https://your-domain.com/api/revalidate?secret=your-secret
+```
+
+### Project shape
 
 ```
 src/
-  app/            # routes: page, [uid], api/{preview,revalidate,exit-preview}, slice-simulator
-  components/     # ViewCanvas, FloatingCan, SodaCan, Header, Footer, …
-  slices/         # Prismic slice components
-  prismicio.ts    # Prismic client (routes + fetch caching)
-public/fonts/     # Alpino variable font (next/font/local)
+  app/            page, [uid], api/preview, api/revalidate, api/exit-preview, slice-simulator
+  components/     ViewCanvas, FloatingCan, SodaCan, Header, Footer, Bounded and friends
+  slices/         Hero, SkyDive, Carousel, BigText, AlternatingText
+  hooks/          useStore, useMediaQuery
+  prismicio.ts    client setup, routes, caching
+public/
+  readme.png      the screenshot at the top of this file
+  Soda-can.gltf, Soda-can.bin, labels/, hdr/, fonts/
 ```
 
-## Security notes
+### A note on security and deploy
 
-- **CVE-2025-29927** (Next.js middleware auth bypass) remediated by running Next 16; the repo ships no middleware, as defense in depth.
-- Remaining `npm audit` findings are dev-only (Slice Machine's express chain, Tailwind's build-time YAML) with no production runtime exposure.
+This started on Next 14 and I moved it to Next 16, which among other things clears CVE-2025-29927. There's no middleware in the project. The revalidate endpoint supports a shared secret so random POSTs can't thrash your cache. What's left in `npm audit` is dev-only build tooling.
 
-## Deploy
+It deploys clean on Vercel from `main`. Set Node to 24.x in project settings, add the env vars above, wire up the Prismic webhook, and you're live.
 
-Works on any Next.js host (Vercel recommended). Set the env vars above, configure the Prismic webhook to `https://<domain>/api/revalidate?secret=<REVALIDATE_SECRET>`, and deploy.
+### Contributing
 
-## Contributing
+Found a bug or have an idea? Open an issue and tell me what you saw. PRs welcome, just open an issue first if it's a big change.
 
-PRs and issues welcome — see [open issues](https://github.com/TheNeovimmer/fizzifresh/issues).
+### License
 
-## License
+Apache-2.0, see LICENSE. Brand and copy are fictional, built for learning and portfolio purposes.
 
-Apache-2.0 — see [LICENSE](./LICENSE).
+— Neo

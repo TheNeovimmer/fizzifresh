@@ -1,10 +1,10 @@
 import clsx from "clsx";
 
 type BoundedProps = {
-  as?: React.ElementType;
+  as?: any;
   className?: string;
   children: React.ReactNode;
-};
+} & Record<string, any>;
 
 export const Bounded = ({
   as: Comp = "section",

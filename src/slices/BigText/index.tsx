@@ -9,7 +9,7 @@ export type BigTextProps = SliceComponentProps<Content.BigTextSlice>;
 /**
  * Component for "BigText" Slices.
  */
-const BigText = ({ slice }: BigTextProps): JSX.Element => {
+const BigText = ({ slice }: BigTextProps) => {
   return (
     <section
       data-slice-type={slice.slice_type}

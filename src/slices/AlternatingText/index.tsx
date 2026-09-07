@@ -20,7 +20,7 @@ export type AlternatingTextProps =
 /**
  * Component for "AlternatingText" Slices.
  */
-const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
+const AlternatingText = ({ slice }: AlternatingTextProps) => {
   return (
     <Bounded
       data-slice-type={slice.slice_type}

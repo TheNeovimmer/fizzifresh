@@ -42,7 +42,7 @@ export type CarouselProps = SliceComponentProps<Content.CarouselSlice>;
 /**
  * Component for "Carousel" Slices.
  */
-const Carousel = ({ slice }: CarouselProps): JSX.Element => {
+const Carousel = ({ slice }: CarouselProps) => {
   const [currentFlavorIndex, setCurrentFlavorIndex] = useState(0);
   const sodaCanRef = useRef<Group>(null);
 

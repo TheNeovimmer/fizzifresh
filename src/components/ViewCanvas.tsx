@@ -2,8 +2,22 @@
 
 import { Canvas } from "@react-three/fiber";
 import { View } from "@react-three/drei";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+
+function isWebGLAvailable() {
+  try {
+    if (typeof document === "undefined") return false;
+    const c = document.createElement("canvas");
+    return !!(
+      c.getContext("webgl2") ||
+      c.getContext("webgl") ||
+      c.getContext("experimental-webgl")
+    );
+  } catch {
+    return false;
+  }
+}
 
 const Loader = dynamic(
   () => import("@react-three/drei").then((mod) => mod.Loader),
@@ -13,6 +27,15 @@ const Loader = dynamic(
 type Props = {};
 
 export default function ViewCanvas({}: Props) {
+  const [webglOk, setWebglOk] = useState(false);
+
+  useEffect(() => {
+    setWebglOk(isWebGLAvailable());
+  }, []);
+
+  // ponytail: skip 3D when GPU is unavailable (VM/headless/--disable-gpu), page still works without it
+  if (!webglOk) return null;
+
   return (
     <>
       <Canvas

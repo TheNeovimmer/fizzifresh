@@ -24,7 +24,7 @@ In this project, we aim to build a sleek and modern personal portfolio for showc
 To get started, clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/bouzayenilyes/fizzifresh.git
+git clone https://github.com/TheNeovimmer/fizzifresh.git
 ```
 Install dependencies:
 
